@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pide Pista</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        img {
+            width: 50%;
+            height: auto;
+        }
+        a {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info" style="display: flex; align-items: right; justify-content: right; margin-bottom: 20px;">
+        <div><img src="static/images/icon-user.png" alt="User Icon" class="user-icon" style="width: 32px;height: 32px;" onclick="redirectToLogin()"></div>
+        <script>
+            function redirectToLogin() {
+            window.location.href = "{{ url_for('login') }}";
+            }
+        </script>
+        <span style="margin-right: 10px; margin-top: 8px; font-size: 16px; color: #007bff;">{{ session["username"] }}</span>
+    </div>
+    <div class="container">
+        <h1>Bienvenido a Pide Pista</h1>
+        <img src="/static/images/padel.jpg" alt="Pádel" />
+        <h3>Crear un nuevo partido</h3><a href="{{ url_for('nuevo_partido') }}">Nuevo Partido</a>
+        <h3>Inscribirse en un partido</h3><a href="{{ url_for('inscribirse') }}">Inscribirse</a>
+        <h3>Login</h3><a href="{{ url_for('login') }}">Login</a>
+    </div>
+</body>
+</html>
+

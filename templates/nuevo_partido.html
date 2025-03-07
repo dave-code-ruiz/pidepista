@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nuevo Partido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label, input, button {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function validarFormulario() {
+            var fechaHora = document.getElementById('fecha_hora').value;
+            if (!fechaHora) {
+                alert('Por favor, introduce una fecha y hora.');
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <div class="user-info" style="display: flex; align-items: right; justify-content: right; margin-bottom: 20px;">
+        <div><img src="static/images/icon-user.png" alt="User Icon" class="user-icon" style="width: 32px;height: 32px;" onclick="redirectToLogin()"></div>
+        <script>
+            function redirectToLogin() {
+            window.location.href = "{{ url_for('login') }}";
+            }
+        </script>
+        <span style="margin-right: 10px; margin-top: 8px; font-size: 16px; color: #007bff;">{{ session["username"] }}</span>
+    </div>
+    <div class="container">
+        <h1>Crear un nuevo partido de pádel</h1>
+        <form method="post" onsubmit="return validarFormulario()">
+            <label for="fecha_hora">Fecha y Hora:</label>
+            <input type="datetime-local" id="fecha_hora" name="fecha_hora" required>
+            <button type="submit">Crear Partido</button>
+        </form>
+    </div>
+</body>
+</html>

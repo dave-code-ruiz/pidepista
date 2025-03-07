@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inscribirse en un Partido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .calendar {
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .square {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 1px solid #007bff;
+        }
+        .square div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #007bff;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: #007bff;
+            color: white;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label, input, button {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .calendar-day {
+            padding: 10px;
+            border: 1px solid #007bff;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .calendar-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info" style="display: flex; align-items: right; justify-content: right; margin-bottom: 20px;">
+        <div><img src="static/images/icon-user.png" alt="User Icon" class="user-icon" style="width: 32px;height: 32px;" onclick="redirectToLogin()"></div>
+        <script>
+            function redirectToLogin() {
+            window.location.href = "{{ url_for('login') }}";
+            }
+        </script>
+        <span style="margin-right: 10px; margin-top: 8px; font-size: 16px; color: #007bff;">{{ session["username"] }}</span>
+    </div>
+    <div class="container">
+        <h1>Inscribirse en un partido</h1>
+        <form method="post" onsubmit="return validarFormulario();">
+            <label for="partido_index">Partido:</label>
+            <input type="hidden" id="partido_index" name="partido_index" required>
+            <div class="calendar">
+                {% for partido in partidos %}
+                    {% set inscripciones_partido = inscripciones | selectattr('partido_index', 'equalto', loop.index0) | list %}
+                    {% if inscripciones_partido|length == 4 %}
+                        <div onclick="document.getElementById('partido_index').value = '{{ loop.index0 }}'; seleccionarPartido(this, '{{ loop.index0 }}')" class="calendar-day" style="background-color: lightcoral">
+                            {{ partido.fecha_hora }}
+                        </div>
+                    {% else %}
+                        <div onclick="document.getElementById('partido_index').value = '{{ loop.index0 }}'; seleccionarPartido(this, '{{ loop.index0 }}')" class="calendar-day" style="background-color: lightgreen">
+                            {{ partido.fecha_hora }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <label for="posicion">Posición y Lado del Campo:</label>
+            <input type="hidden" id="posicion" name="posicion" required>
+            <input type="hidden" id="lado" name="lado" required>
+            <div class="square">
+                <div id="drive_derecha" onclick="seleccionarPosicion('drive', 'derecha')">Drive<br>Derecha</div>
+                <div id="reves_derecha" onclick="seleccionarPosicion('reves', 'derecha')">Reves<br>Derecha</div>
+                <div id="reves_izquierda" onclick="seleccionarPosicion('reves', 'izquierda')">Reves<br>Izquierda</div>
+                <div id="drive_izquierda" onclick="seleccionarPosicion('drive', 'izquierda')">Drive<br>Izquierda</div>
+            </div>
+            <button type="submit" id="submit-button">Inscribirse</button>
+            <button type="button" onclick="anularInscripcion()">Anular Inscripción</button>
+        </form>
+        <h2>Inscripciones</h2>
+        {% for partido in partidos %}
+            <h3>{{ partido.fecha_hora }}</h3>
+            <ul>
+                {% set inscripciones_partido = inscripciones | selectattr('partido_index', 'equalto', loop.index0) | list %}
+                {% for inscripcion in inscripciones_partido %}
+                    <li>{{ inscripcion.nombre }} - {{ inscripcion.posicion }} - {{ inscripcion.lado }}</li>
+                {% endfor %}
+                {% if inscripciones_partido|length == 0 %}
+                    <li>No hay inscripciones.</li>
+                {% endif %}
+            </ul>
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.square div').forEach(div => {
+                div.setAttribute('data-original-text', div.innerHTML);
+            });
+        });
+
+        function seleccionarPosicion(posicion, lado) {
+            document.getElementById('posicion').value = posicion;
+            document.getElementById('lado').value = lado;
+            document.querySelectorAll('.square div').forEach(div => div.classList.remove('selected'));
+            document.getElementById(posicion + '_' + lado).classList.add('selected');
+        }
+
+        function seleccionarPartido(element, partidoIndex) {
+            document.querySelectorAll('.calendar-day').forEach(day => day.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            // Clear previous inscriptions
+            document.querySelectorAll('.square div').forEach(div => {
+                div.classList.remove('selected');
+                div.innerHTML = div.getAttribute('data-original-text');
+                div.style.pointerEvents = 'auto';
+            });
+            
+            // Get inscriptions for the selected partido
+            const inscripciones = JSON.parse('{{ inscripciones|tojson }}');
+            const inscripcionesPartido = inscripciones.filter(inscripcion => inscripcion.partido_index === parseInt(partidoIndex));
+            
+            // Update the square with inscriptions
+            inscripcionesPartido.forEach(inscripcion => {
+                const div = document.getElementById(inscripcion.posicion + '_' + inscripcion.lado);
+                if (div) {
+                    div.innerHTML = inscripcion.nombre;
+                    div.style.pointerEvents = 'none';
+                    div.classList.add('selected');
+                }
+            });
+        }
+
+        function validarFormulario() {
+            const partidoIndex = document.getElementById('partido_index').value;
+            const posicion = document.getElementById('posicion').value;
+            const lado = document.getElementById('lado').value;
+            const inscripciones = JSON.parse('{{ inscripciones|tojson }}');
+            const usuario = '{{ session["username"] }}'; // Assuming you have a variable for the current user
+
+            if (!partidoIndex) {
+                alert('Por favor, selecciona un partido.');
+                return false;
+            }
+
+            if (!posicion || !lado) {
+                alert('Por favor, selecciona una posición y un lado del campo.');
+                return false;
+            }
+
+            // Check if the user is already registered for the selected partido
+            const inscripcionesPartido = inscripciones.filter(inscripcion => inscripcion.partido_index === parseInt(partidoIndex));
+            const usuarioInscrito = inscripcionesPartido.some(inscripcion => inscripcion.nombre === usuario);
+
+            if (usuarioInscrito) {
+                alert('Ya estás inscrito en este partido.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function anularInscripcion() {
+            const partidoIndex = document.getElementById('partido_index').value;
+            const usuario = '{{ session["username"] }}'; // Assuming you have a variable for the current user
+
+            if (!partidoIndex) {
+                alert('Por favor, selecciona un partido.');
+                return;
+            }
+
+            // Send a request to the server to cancel the inscription
+            fetch('/anular_inscripcion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    partido_index: partidoIndex,
+                    usuario: usuario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Inscripción anulada con éxito.');
+                    location.reload(); // Reload the page to update the inscriptions
+                } else {
+                    alert('Error al anular la inscripción.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al anular la inscripción.');
+            });
+        }
+    </script>
+</body>
+</html>

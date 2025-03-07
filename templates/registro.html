@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro de Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        label, input, button {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info" style="display: flex; align-items: right; justify-content: right; margin-bottom: 20px;">
+        <div><img src="static/images/icon-user.png" alt="User Icon" class="user-icon" style="width: 32px;height: 32px;" onclick="redirectToLogin()"></div>
+        <script>
+            function redirectToLogin() {
+            window.location.href = "{{ url_for('login') }}";
+            }
+        </script>
+        <span style="margin-right: 10px; margin-top: 8px; font-size: 16px; color: #007bff;">{{ session["username"] }}</span>
+    </div>
+    <div class="container">
+        <h1>Registro de Usuario</h1>
+        <form method="post">
+            <label for="username">Nombre de usuario:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="nombre_completo">Nombre Completo:</label>
+            <input type="text" id="nombre_completo" name="nombre_completo" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="admin">¿Administrador?</label>
+            <input type="checkbox" id="admin" name="admin">
+            <button type="submit">Registrar</button>
+        </form>
+    </div>
+</body>
+</html>
